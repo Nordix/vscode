@@ -384,8 +384,6 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
 
 		const telemetry = gulp.src('.build/telemetry/**', { base: '.build/telemetry', dot: true });
 
-		const workbenchModes = gulp.src('resources/workbenchModes/**', { base: '.', dot: true });
-
 		const jsFilter = util.filter(data => !data.isDirectory() && /\.js$/.test(data.path));
 		const root = path.resolve(path.join(import.meta.dirname, '..'));
 		const productionDependencies = getProductionDependencies(root);
@@ -420,7 +418,6 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
 			license,
 			api,
 			telemetry,
-			workbenchModes,
 			sources,
 			deps
 		);
@@ -477,7 +474,7 @@ function packageTask(platform: string, arch: string, sourceFolderName: string, d
 			.pipe(util.fixWin32DirectoryPermissions())
 			.pipe(filter(['**', '!**/.github/**'], { dot: true })) // https://github.com/microsoft/vscode/issues/116523
 			.pipe(electron({ ...config, platform, arch: arch === 'armhf' ? 'arm' : arch, ffmpegChromium: false }))
-			.pipe(filter(['**', '!LICENSE', '!version'], { dot: true }));
+			.pipe(filter(['**', '!LICENSE', '!version', ...(platform === 'darwin' ? ['!**/Contents/Applications/**'] : [])], { dot: true }));
 
 		if (platform === 'linux') {
 			result = es.merge(result, gulp.src('resources/completions/bash/code', { base: '.' })
